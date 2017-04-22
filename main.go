@@ -40,13 +40,13 @@ func main() {
 		if err != nil {
 			// If no results send null
 			result = gin.H{
-				"result": nil,
-				"count":  0,
+				"Hasil":       nil,
+				"Jumlah Data": 0,
 			}
 		} else {
 			result = gin.H{
-				"result": orang,
-				"count":  1,
+				"Hasil":       orang,
+				"Jumlah Data": 1,
 			}
 		}
 		c.JSON(http.StatusOK, result)
@@ -71,8 +71,8 @@ func main() {
 		}
 		defer rows.Close()
 		c.JSON(http.StatusOK, gin.H{
-			"result": orangorang,
-			"count":  len(orangorang),
+			"hasil":        orangorang,
+			"jumalah data": len(orangorang),
 		})
 	})
 
@@ -100,8 +100,50 @@ func main() {
 		defer stmt.Close()
 		name := buffer.String()
 		c.JSON(http.StatusOK, gin.H{
-			"message": fmt.Sprintf(" %s successfully created", name),
+			"message": fmt.Sprintf(" %s berhasil di tambahkan ke database", name),
 		})
 	})
-	router.Run(":3000")
+	// mengubah data yang sudah ada
+	router.PUT("/orang", func(c *gin.Context) {
+		var buffer bytes.Buffer
+		id := c.Query("id")
+		NamaPertama := c.PostForm("nama_pertama")
+		NamaTerakhir := c.PostForm("nama_terakhir")
+		stmt, err := db.Prepare("update orang set nama_pertama= ?, nama_terakhir= ? where id= ?;")
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		_, err = stmt.Exec(NamaPertama, NamaTerakhir, id)
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+
+		// Fastest way to append strings
+		buffer.WriteString(NamaPertama)
+		buffer.WriteString(" ")
+		buffer.WriteString(NamaTerakhir)
+		defer stmt.Close()
+		name := buffer.String()
+		c.JSON(http.StatusOK, gin.H{
+			"message": fmt.Sprintf("Data berhasil di rubah %s", name),
+		})
+	})
+	//menghapus Data berdasarkan ID
+
+	router.DELETE("/orang", func(c *gin.Context) {
+		id := c.Query("id")
+		stmt, err := db.Prepare("delete from orang where id= ?;")
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		_, err = stmt.Exec(id)
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"Pesan": fmt.Sprintf("Anda Telah berhasil menghapus id: %s", id)})
+	})
+
+	router.Run(":8000")
+
 } //end
