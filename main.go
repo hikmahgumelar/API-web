@@ -52,7 +52,7 @@ func main() {
 		c.JSON(http.StatusOK, result)
 	})
 	//mengambil data semua orang
-	router.GET("/orangorang", func(c *gin.Context) {
+	router.GET("/orang-orang", func(c *gin.Context) {
 		var (
 			orang      Orang
 			orangorang []Orang
@@ -142,6 +142,7 @@ func main() {
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"Pesan": fmt.Sprintf("Anda Telah berhasil menghapus id: %s", id)})
+
 	})
 
 	router.Run(":8000")
